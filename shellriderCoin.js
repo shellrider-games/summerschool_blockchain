@@ -27,7 +27,10 @@ class Block {
     }
 
     mine(difficulty) {
-        while (this.hash.substring(0,difficulty) !== Array(difficulty + 1).join('0')){
+        while (
+            this.hash.substring(0,difficulty) 
+            !== Array(difficulty + 1).join('0')
+        ){
             this.nonce++;
             this.hash = this.calculateHash();
         }
@@ -43,7 +46,10 @@ class Blockchain {
     }
 
     createGenesisBlock() {
-        return new Block(Date.now(), [new Transaction(null, "Alice", this.miningReward)]);
+        return new Block(
+            Date.now(),
+            [new Transaction(null, "Alice", this.miningReward)]
+        );
     }
 
     getLatestBlock(){
@@ -63,7 +69,9 @@ class Blockchain {
             this.getLatestBlock().hash
         );
         nextBlock.mine(this.difficulty);
-        console.log(`Mened block ${nextBlock.hash} in ${nextBlock.nonce} iterations`);
+        console.log(
+            `Mined block ${nextBlock.hash} in ${nextBlock.nonce} iterations`
+        );
         this.chain.push(nextBlock);
         this.pendingTransactions = [
             new Transaction(null, rewardAddress, this.miningReward)
@@ -75,8 +83,12 @@ class Blockchain {
             const prevBlock = this.chain[i-1];
             const curBlock = this.chain[i];
 
-            if(curBlock.previousHash !== prevBlock.calculateHash()) { return false; }
-            if(curBlock.hash !== curBlock.calculateHash()) { return false; }
+            if(curBlock.previousHash !== prevBlock.calculateHash()) {
+                return false; 
+            }
+            if(curBlock.hash !== curBlock.calculateHash()) {
+                return false;
+            }
         }
         return true;
     }
@@ -121,4 +133,6 @@ console.log(JSON.stringify(shellriderCoin, null, 4));
 console.log("Chain is valid?", JSON.stringify(shellriderCoin.isValid()));
 console.log(`Alice has ${shellriderCoin.getBalance("Alice")} shellriderCoin`);
 console.log(`Bob has ${shellriderCoin.getBalance("Bob")} shellriderCoin`);
-console.log(`Charlie has ${shellriderCoin.getBalance("Charlie")} shellriderCoin`)
+console.log(
+    `Charlie has ${shellriderCoin.getBalance("Charlie")} shellriderCoin`
+);
