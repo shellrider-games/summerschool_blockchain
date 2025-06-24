@@ -1,21 +1,27 @@
 const { createHash } = require('crypto');
 
+class Transaction {
+    constructor(from, to, amount){
+        this.from = from;
+        this.to = to;
+        this.amount = amount;
+    }
+}
+
 class Block {
-    constructor(index, timestamp, data, previousHash = '') {
-        this.index = index;
+    constructor(timestamp, transactions, previousHash = '') {
         this.previousHash = previousHash;
         this.timestamp = timestamp;
-        this.data = data;
+        this.transactions = transactions;
         this.nonce = 0;
         this.hash = this.calculateHash();
     }
 
     calculateHash() {
         return createHash('sha256').update(
-            this.index +
             this.previousHash +
             this.timestamp +
-            JSON.stringify(this.data) +
+            JSON.stringify(this.transactions) +
             this.nonce
         ).digest('hex');
     }
@@ -25,18 +31,19 @@ class Block {
             this.nonce++;
             this.hash = this.calculateHash();
         }
-        console.log(`Block minded: ${this.hash} in ${this.nonce} iterations`);
     }
 }
 
 class Blockchain {
     constructor() {
+        this.miningReward = 50;
+        this.difficulty = 3;
         this.chain = [this.createGenesisBlock()];
-        this.difficulty = 5;
+        this.pendingTransactions = [];
     }
 
     createGenesisBlock() {
-        return new Block(0, "24.06.2025", "Genesis Block");
+        return new Block(Date.now(), [new Transaction(null, "Alice", this.miningReward)]);
     }
 
     getLatestBlock(){
@@ -47,6 +54,20 @@ class Blockchain {
         nextBlock.previousHash = this.getLatestBlock().hash;
         nextBlock.mine(this.difficulty);
         this.chain.push(nextBlock);
+    }
+
+    minePendingTransactions(rewardAddress){
+        const nextBlock = new Block(
+            Date.now(),
+            this.pendingTransactions,
+            this.getLatestBlock().hash
+        );
+        nextBlock.mine(this.difficulty);
+        console.log(`Mened block ${nextBlock.hash} in ${nextBlock.nonce} iterations`);
+        this.chain.push(nextBlock);
+        this.pendingTransactions = [
+            new Transaction(null, rewardAddress, this.miningReward)
+        ];
     }
 
     isValid(){
@@ -60,12 +81,44 @@ class Blockchain {
         return true;
     }
 
+    createTransaction(transaction){
+        if(this.getBalance(transaction.from) < transaction.amount){
+            console.error("Tried to spend more than available");
+            return;
+        }
+        this.pendingTransactions.push(transaction);
+    }
+
+    getBalance(address) {
+        let balance = 0;
+        this.chain.forEach((block) => {
+            block.transactions.forEach((transaction) => {
+                if (transaction.to === address) {
+                    balance += transaction.amount;
+                }
+                if (transaction.from === address) {
+                    balance -= transaction.amount;
+                }
+            });
+        });
+        return balance;
+    }
+
 }
 
 let shellriderCoin = new Blockchain();
-shellriderCoin.addBlock(new Block(1, "24.06.2025", { amount : 7 }));
-shellriderCoin.addBlock(new Block(2, "24.06.2025", { amount : 8 }));
-shellriderCoin.addBlock(new Block(3, "24.06.2025", { amount : 13 }));
+shellriderCoin.createTransaction(new Transaction("Alice", "Bob", 2));
+shellriderCoin.createTransaction(new Transaction("Alice", "Charlie", 1));
+shellriderCoin.createTransaction(new Transaction("Charlie", "Bob", 1));
+shellriderCoin.minePendingTransactions("Alice");
+shellriderCoin.createTransaction(new Transaction("Charlie", "Bob", 1));
+shellriderCoin.minePendingTransactions("Charlie");
+shellriderCoin.createTransaction(new Transaction('Bob', 'Alice', 1));
+shellriderCoin.minePendingTransactions("Charlie");
+
 
 console.log(JSON.stringify(shellriderCoin, null, 4));
 console.log("Chain is valid?", JSON.stringify(shellriderCoin.isValid()));
+console.log(`Alice has ${shellriderCoin.getBalance("Alice")} shellriderCoin`);
+console.log(`Bob has ${shellriderCoin.getBalance("Bob")} shellriderCoin`);
+console.log(`Charlie has ${shellriderCoin.getBalance("Charlie")} shellriderCoin`)
