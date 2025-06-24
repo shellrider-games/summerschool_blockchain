@@ -63,7 +63,7 @@ class Blockchain {
 }
 
 let shellriderCoin = new Blockchain();
-shellriderCoin.addBlock(new Block(1, "24.06.2025", { amount : 5 }));
+shellriderCoin.addBlock(new Block(1, "24.06.2025", { amount : 7 }));
 shellriderCoin.addBlock(new Block(2, "24.06.2025", { amount : 8 }));
 shellriderCoin.addBlock(new Block(3, "24.06.2025", { amount : 13 }));
 
