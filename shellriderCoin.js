@@ -95,7 +95,7 @@ class Blockchain {
 
     createTransaction(transaction){
         if(this.getBalance(transaction.from) < transaction.amount){
-            console.error("Tried to spend more than available");
+            console.error(`${ transaction.from } tried to spend more than available`);
             return;
         }
         this.pendingTransactions.push(transaction);
@@ -129,10 +129,7 @@ shellriderCoin.createTransaction(new Transaction('Bob', 'Alice', 1));
 shellriderCoin.minePendingTransactions("Charlie");
 
 
-console.log(JSON.stringify(shellriderCoin, null, 4));
-console.log("Chain is valid?", JSON.stringify(shellriderCoin.isValid()));
 console.log(`Alice has ${shellriderCoin.getBalance("Alice")} shellriderCoin`);
 console.log(`Bob has ${shellriderCoin.getBalance("Bob")} shellriderCoin`);
-console.log(
-    `Charlie has ${shellriderCoin.getBalance("Charlie")} shellriderCoin`
-);
+console.log(`Charlie has ${shellriderCoin.getBalance("Charlie")} shellriderCoin`);
+console.log("Chain is valid?", JSON.stringify(shellriderCoin.isValid()));
