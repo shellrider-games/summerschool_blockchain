@@ -1,4 +1,4 @@
-const { createHash} = require('crypto');
+const { createHash } = require('crypto');
 
 class Block {
     constructor(index, timestamp, data, previousHash = '') {
